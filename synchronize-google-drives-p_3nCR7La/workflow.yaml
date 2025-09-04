@@ -1,0 +1,94 @@
+schema: workflow/2022.04
+name: Synchronize Google Drives
+settings:
+  error_notification: true
+triggers:
+- id: hi_eqHN1nx
+steps:
+- namespace: list_source_folders
+  runtime: nodejs20.x
+  uses: "./list_source_folders/actions/list-files/list-files.mjs"
+  props:
+    googleDrive:
+      authProvisionId: apn_ZWhPX8P
+    folderId:
+      __lv:
+        label: Google Admin Downloads
+        value: 0B3MlWGgz5xc4flZ3d3owR3dQT0lrSHk1Ql82NXd6RndZdjRWUnhwenFjaVZfQWYzVDh2U2M
+    fields: files(id,name,mimeType,modifiedTime,parents,size,md5Checksum)
+    trashed: false
+- namespace: specify_folders_to_sync
+  runtime: nodejs20.x
+  uses: "./specify_folders_to_sync/entry.js"
+  props:
+    google_drive:
+      authProvisionId: apn_ZWhPX8P
+    source_drive: My Drive
+    folder_selection_method:
+      __lv:
+        label: Select Individual Folders
+        value: individual
+    source_folders:
+    - 0B3MlWGgz5xc4flZ3d3owR3dQT0lrSHk1Ql82NXd6RndZdjRWUnhwenFjaVZfQWYzVDh2U2M
+    destination_parent_folder:
+      __lv:
+        label: Google Admin Downloads
+        value: 0B3MlWGgz5xc4flZ3d3owR3dQT0lrSHk1Ql82NXd6RndZdjRWUnhwenFjaVZfQWYzVDh2U2M
+    sync_subfolders: true
+    preserve_folder_structure: true
+    sync_permissions: true
+- namespace: compare_folders
+  runtime: nodejs20.x
+  uses: "./compare_folders/entry.js"
+  props:
+    google_drive:
+      authProvisionId: apn_ZWhPX8P
+    sourceFolderId:
+      __lv:
+        label: Google Admin Downloads
+        value: 0B3MlWGgz5xc4flZ3d3owR3dQT0lrSHk1Ql82NXd6RndZdjRWUnhwenFjaVZfQWYzVDh2U2M
+    destinationFolderId:
+      __lv:
+        label: Google Admin Downloads
+        value: 0B3MlWGgz5xc4flZ3d3owR3dQT0lrSHk1Ql82NXd6RndZdjRWUnhwenFjaVZfQWYzVDh2U2M
+    includeSubfolders: true
+- namespace: perform_incremental_sync
+  runtime: nodejs20.x
+  uses: "./perform_incremental_sync/actions/list-files/list-files.mjs"
+  props:
+    googleDrive:
+      authProvisionId: apn_b6hVAgr
+    fields: files(id,name,mimeType,modifiedTime,parents,size,md5Checksum)
+    trashed: false
+- namespace: execute_folder_copy
+  runtime: nodejs20.x
+  uses: "./execute_folder_copy/entry.js"
+  props:
+    google_drive:
+      authProvisionId: apn_ZWhPX8P
+    sourceFolderId:
+      __lv:
+        label: Google Admin Downloads
+        value: 0B3MlWGgz5xc4flZ3d3owR3dQT0lrSHk1Ql82NXd6RndZdjRWUnhwenFjaVZfQWYzVDh2U2M
+    destinationFolderId:
+      __lv:
+        label: Google Admin Downloads
+        value: 0B3MlWGgz5xc4flZ3d3owR3dQT0lrSHk1Ql82NXd6RndZdjRWUnhwenFjaVZfQWYzVDh2U2M
+    includeSubfolders: true
+    conflictResolution:
+      __lv:
+        label: Rename duplicates
+        value: rename
+    preserveStructure: true
+    batchSize: 20
+    maxConcurrency: 5
+- namespace: sync_permissions
+  runtime: nodejs20.x
+  uses: "./sync_permissions/actions/add-file-sharing-preference/add-file-sharing-preference.mjs"
+  _props_cursor: dyp_JoUkgm0
+  props:
+    googleDrive:
+      authProvisionId: apn_b6hVAgr
+    useFileOrFolder: Folder
+    type: user
+
